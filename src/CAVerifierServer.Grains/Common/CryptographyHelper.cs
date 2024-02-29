@@ -8,9 +8,7 @@ namespace CAVerifierServer.Grains.Common;
 public class CryptographyHelper
 {
     public static GenerateSignatureOutput GenerateSignature(int guardianType, string salt,
-        string guardianIdentifierHash,
-        string privateKey,
-        string operationType, string chainId)
+        string guardianIdentifierHash, string privateKey, string operationType, string chainId, string operationDetails)
     {
         //create signature
         var verifierSPublicKey =
@@ -19,6 +17,10 @@ public class CryptographyHelper
         var data = string.IsNullOrWhiteSpace(chainId)
             ? $"{guardianType},{guardianIdentifierHash},{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss.fff},{verifierAddress.ToBase58()},{salt},{operationType}"
             : $"{guardianType},{guardianIdentifierHash},{DateTime.UtcNow:yyyy/MM/dd HH:mm:ss.fff},{verifierAddress.ToBase58()},{salt},{operationType},{chainId}";
+
+        data = operationDetails.IsNullOrWhiteSpace()
+            ? data
+            : $"{data},{HashHelper.ComputeFrom(operationDetails).ToHex()}";
         var hashByteArray = HashHelper.ComputeFrom(data).ToByteArray();
         var signature =
             CryptoHelper.SignWithPrivateKey(ByteArrayHelper.HexStringToByteArray(privateKey), hashByteArray);
