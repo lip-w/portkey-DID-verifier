@@ -1,17 +1,13 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using CAVerifierServer.Email;
+﻿using CAVerifierServer.Email;
 using CAVerifierServer.Grains;
 using CAVerifierServer.Options;
 using CAVerifierServer.Phone;
 using CAVerifierServer.VerifyCodeSender;
+using CAVerifierServer.VerifyRevokeCode;
 using Microsoft.Extensions.DependencyInjection;
-using Volo.Abp.Account;
 using Volo.Abp.AutoMapper;
 using Volo.Abp.Emailing;
-using Volo.Abp.FeatureManagement;
-using Volo.Abp.Identity;
 using Volo.Abp.Modularity;
-using Volo.Abp.PermissionManagement;
 using Volo.Abp.SettingManagement;
 using Volo.Abp.TenantManagement;
 
@@ -19,12 +15,8 @@ namespace CAVerifierServer;
 
 [DependsOn(
     typeof(CAVerifierServerDomainModule),
-    typeof(AbpAccountApplicationModule),
     typeof(CAVerifierServerApplicationContractsModule),
-    typeof(AbpIdentityApplicationModule),
-    typeof(AbpPermissionManagementApplicationModule),
     typeof(AbpTenantManagementApplicationModule),
-    typeof(AbpFeatureManagementApplicationModule),
     typeof(AbpSettingManagementApplicationModule),
     typeof(CAVerifierServerGrainsModule)
 )]
@@ -44,6 +36,7 @@ public class CAVerifierServerApplicationModule : AbpModule
         Configure<SMSTemplateOptions>(configuration.GetSection("SMSTemplate"));
         Configure<MobileCountryRegularCategoryOptions>(configuration.GetSection("MobileCountryRegularCategory"));
         Configure<TwilioSmsMessageOptions>(configuration.GetSection("TwilioSmsMessage"));
+        Configure<FacebookOptions>(configuration.GetSection("Facebook"));
         
         context.Services.AddSingleton<IEmailSender, AwsEmailSender>();
         context.Services.AddSingleton<ISMSServiceSender,AwsSmsMessageSender>();
@@ -51,6 +44,14 @@ public class CAVerifierServerApplicationModule : AbpModule
         context.Services.AddSingleton<ISMSServiceSender, TwilioSmsMessageSender>();
         context.Services.AddSingleton<IVerifyCodeSender, EmailVerifyCodeSender>();
         context.Services.AddSingleton<IVerifyCodeSender, PhoneVerifyCodeSender>();
+        
+        context.Services.AddSingleton<IVerifyRevokeCodeValidator, EmailRevokeCodeValidator>();
+        context.Services.AddSingleton<IVerifyRevokeCodeValidator, FaceBookRevokeCodeValidator>();
+        context.Services.AddSingleton<IVerifyRevokeCodeValidator, TwitterRevokeCodeValidator>();
+        context.Services.AddSingleton<IVerifyRevokeCodeValidator, TelegramRevokeCodeValidator>();
+        context.Services.AddSingleton<IVerifyRevokeCodeValidator, AppleRevokeCodeValidator>();
+        context.Services.AddSingleton<IVerifyRevokeCodeValidator, GoogleRevokeCodeValidator>();
+    
         context.Services.AddHttpClient();
     }
 }
