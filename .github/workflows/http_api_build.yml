@@ -5,6 +5,7 @@ on:
     branches:
       - 'master'
       - 'release/*'  # 其他分支
+      - 'release-actions'
     tags:
       - "v*.*"
 env:
